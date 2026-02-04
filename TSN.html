@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TSN Studio | Versace HD Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,700;1,500&family=Oswald:wght@400;500;700&display=swap');
+
+        :root { --tsn: #cc0000; --paper: #e3ddd0; --ink: #1a1a1a; }
+        
+        body { background: #0a0a0a; color: #fff; font-family: 'Oswald', sans-serif; margin: 0; padding: 0; }
+
+        /* АВТОРСТВО */
+        .site-header { text-align: center; padding: 15px; font-size: 10px; letter-spacing: 2px; color: #444; text-transform: uppercase; border-bottom: 1px solid #222; }
+        .site-header span { color: var(--tsn); }
+
+        /* НАВІГАЦІЯ */
+        .dock { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; padding: 15px 0 25px; border-top: 2px solid #333; z-index: 1000; }
+        .dock-btn { background: none; border: none; color: #555; font-size: 11px; font-weight: bold; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+        .dock-btn.active { color: var(--tsn); }
+        .dock-btn b { font-size: 24px; font-style: normal; }
+
+        #workspace { padding: 10px 10px 120px; display: flex; flex-direction: column; gap: 30px; align-items: center; }
+        .card { width: 100%; max-width: 550px; background: #1a1a1a; border-radius: 15px; overflow: hidden; }
+
+        /* КОНТЕЙНЕР РЕНДЕРУ (HD FIX) */
+        .render-box { 
+            width: 100%; 
+            position: relative; 
+            background: var(--paper); 
+            color: var(--ink); 
+            overflow: hidden;
+            image-rendering: -webkit-optimize-contrast; /* Для чіткості */
+        }
+
+        /* ГАЗЕТА */
+        .news-layout { padding: 30px 25px; display: block; }
+        .news-meta { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; border-bottom: 1px solid var(--ink); margin-bottom: 15px; }
+        .logo { font-family: 'Montserrat', sans-serif; font-size: 45px; margin: 0; font-weight: 900; letter-spacing: -2px; text-align: center; }
+        .logo span { color: var(--tsn); }
+        .headline { font-family: 'Montserrat', sans-serif; font-size: 28px; text-align: center; margin: 15px 0; text-transform: uppercase; font-weight: 900; line-height: 1; border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink); padding: 10px 0; outline: none; }
+        
+        .news-columns { column-count: 2; column-gap: 20px; text-align: justify; font-family: 'EB Garamond', serif; }
+        .lead-text { font-weight: 700; font-size: 19px; line-height: 1.2; margin-bottom: 10px; display: block; }
+        .body-p { font-size: 16px; line-height: 1.25; margin-bottom: 10px; outline: none; }
+        .quote { font-style: italic; border-top: 1px solid var(--tsn); border-bottom: 1px solid var(--tsn); padding: 10px 0; margin: 15px 0; font-size: 17px; font-weight: 500; }
+
+        /* ФОТО */
+        .photo-container { 
+            width: 100%; aspect-ratio: 16 / 9; 
+            background-color: #222; background-position: center; background-size: cover; 
+            position: relative; margin: 15px 0;
+        }
+
+        /* ЕФІР (TV) */
+        .tv-layout { display: none; width: 100%; aspect-ratio: 16 / 9; background: #000; position: relative; }
+        .live-badge { 
+            position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px;
+            background: rgba(204, 0, 0, 0.2); color: #ff4d4d; padding: 4px 10px; 
+            font-size: 10px; font-weight: 800; border: 1px solid rgba(255, 77, 77, 0.4); border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .dot { width: 6px; height: 6px; background: #ff4d4d; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .tv-plates { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; }
+        .tsn-red { background: var(--tsn); color: #fff; padding: 3px 12px; font-weight: 900; font-size: 13px; width: fit-content; font-family: 'Montserrat'; }
+        .info-white { background: #fff; color: #000; padding: 12px 18px; font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 900; text-transform: uppercase; border-bottom: 6px solid var(--tsn); }
+
+        /* РЕЖИМИ */
+        .mode-tv .news-layout { display: none; }
+        .mode-tv .tv-layout { display: block; }
+        .mode-tv .render-box { background: #000; }
+        .mode-tv .photo-container { margin: 0; height: 100%; width: 100%; }
+
+        /* КНОПКИ */
+        .btns { display: flex; padding: 12px; gap: 10px; background: #1a1a1a; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 8px; background: #333; color: #fff; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+    </style>
+</head>
+<body class="mode-news">
+
+    <div class="site-header">
+        Developed by <span>G.Versace</span> spécialement для ТСН
+    </div>
+
+    <div id="workspace"></div>
+
+    <div class="dock">
+        <button class="dock-btn active" id="bn" onclick="setMode('news')"><b>🗞️</b>Газета</button>
+        <button class="dock-btn" id="bt" onclick="setMode('tv')"><b>📺</b>Ефір</button>
+        <button class="dock-btn" onclick="add()" style="color:#2ecc71;"><b>➕</b>Додати</button>
+        <button class="dock-btn" onclick="save()" style="color:#fff;"><b>💾</b>Зберегти</button>
+    </div>
+
+    <script>
+        let counter = 0;
+
+        function add() {
+            counter++;
+            const ws = document.getElementById('workspace');
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `block-${counter}`;
+            card.innerHTML = `
+                <div class="render-box" id="area-${counter}">
+                    <div class="news-layout">
+                        <div class="news-meta"><span>№ ${200 + counter} / СПЕЦВИПУСК</span><span>${new Date().toLocaleDateString()}</span></div>
+                        <div class="logo">ТСН<span>.</span>UA</div>
+                        <div class="headline" contenteditable="true">ВВЕДІТЬ ЗАГОЛОВОК</div>
+                        <div class="photo-container" id="p-news-${counter}" style="background-image: url('https://via.placeholder.com/800x450');"></div>
+                        <div class="news-columns">
+                            <div class="lead-text" contenteditable="true">Головна новина дня...</div>
+                            <div class="body-p" contenteditable="true">Ваша стаття у двох колонках. Текст автоматично підлаштується.</div>
+                            <div class="quote" contenteditable="true">"Важлива цитата."</div>
+                        </div>
+                    </div>
+                    <div class="tv-layout">
+                        <div class="photo-container" id="p-tv-${counter}" style="background-image: url('https://via.placeholder.com/800x450');">
+                            <div class="live-badge"><div class="dot"></div> НАЖИВО</div>
+                            <div class="tv-plates">
+                                <div class="tsn-red">ТСН</div>
+                                <div class="info-white" contenteditable="true">ТЕКСТ ТИТРІВ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btns">
+                    <button class="btn" onclick="pick(${counter})">📸 Фото</button>
+                    <button class="btn" onclick="del(${counter})" style="color:#ff4444">✕</button>
+                    <input type="file" id="f-${counter}" style="display:none" accept="image/*" onchange="load(event, ${counter})">
+                </div>
+            `;
+            ws.appendChild(card);
+        }
+
+        function pick(n) { document.getElementById(`f-${n}`).click(); }
+        function load(e, n) {
+            if(e.target.files[0]) {
+                const r = new FileReader();
+                r.onload = (f) => { 
+                    const url = `url(${f.target.result})`;
+                    document.getElementById(`p-news-${n}`).style.backgroundImage = url;
+                    document.getElementById(`p-tv-${n}`).style.backgroundImage = url;
+                };
+                r.readAsDataURL(e.target.files[0]);
+            }
+        }
+        function del(n) { document.getElementById(`block-${n}`).remove(); }
+
+        function setMode(m) {
+            document.body.className = 'mode-' + m;
+            document.getElementById('bn').classList.toggle('active', m === 'news');
+            document.getElementById('bt').classList.toggle('active', m === 'tv');
+        }
+
+        async function save() {
+            const el = document.querySelectorAll('.render-box');
+            for (let b of el) {
+                // ПАРАМЕТРИ ДЛЯ HD ЯКОСТІ
+                const canvas = await html2canvas(b, { 
+                    scale: 3, // Збільшуємо розширення у 3 рази
+                    useCORS: true, 
+                    allowTaint: true,
+                    backgroundColor: null,
+                    scrollX: 0,
+                    scrollY: -window.scrollY
+                });
+                
+                const a = document.createElement('a');
+                a.download = `TSN_HD_${Date.now()}.png`;
+                a.href = canvas.toDataURL("image/png", 1.0); // Максимальна якість
+                a.click();
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+        window.onload = add;
+    </script>
+</body>
+</html>
