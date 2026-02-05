@@ -3,198 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TSN Editorial Studio</title>
+    <title>TSN Editorial Studio - Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Manrope:wght@800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;800&family=Playfair+Display:wght@700&family=Manrope:wght@800&display=swap');
 
         :root {
             --tv-bg: #0a0a0b;
             --tv-accent: #e61e2a;
             --tv-card: #161618;
-            --tv-text: #ffffff;
-            --news-bg: #0f0f10;
-            --news-accent: #e61e2a;
-            --news-card: #1a1a1c;
-            --news-text: #ffffff;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             margin: 0; padding: 0;
             font-family: 'Inter', sans-serif;
+            background-color: var(--tv-bg);
+            color: white;
             display: flex; flex-direction: column; align-items: center;
-            transition: var(--transition);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body.mode-tv { background-color: var(--tv-bg); color: var(--tv-text); }
-        body.mode-news { background-color: var(--news-bg); color: var(--news-text); }
-
+        /* Стилі шапки */
         .header {
-            width: 100%; padding: 25px 0; text-align: center;
+            width: 100%; padding: 20px 0; text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            letter-spacing: 2px; font-weight: 800; font-size: 12px;
-            text-transform: uppercase;
+            font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
         }
         .header span { color: var(--tv-accent); }
 
+        /* Контейнер для карток */
         #studio-layout {
-            width: 100%; max-width: 500px; padding: 40px 20px 150px;
-            display: flex; flex-direction: column; gap: 40px;
+            width: 100%; max-width: 450px; padding: 20px 15px 120px;
+            display: flex; flex-direction: column; gap: 30px;
         }
 
         .editor-card {
-            border-radius: 20px; overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            transition: var(--transition);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px; overflow: hidden;
             background: var(--tv-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
+        /* Дизайни */
         .canvas-area { position: relative; width: 100%; overflow: hidden; }
-
-        /* ЕФІР */
         .tv-design { aspect-ratio: 16/9; position: relative; background: #000; }
         .tv-ui {
             position: absolute; bottom: 0; left: 0; right: 0;
-            padding: 30px 20px; z-index: 10;
+            padding: 25px 15px; z-index: 10;
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
         }
         .tv-headline {
-            font-family: 'Manrope', sans-serif; font-size: 20px; color: #fff;
-            border-left: 4px solid var(--tv-accent); padding-left: 15px;
+            font-family: 'Manrope', sans-serif; font-size: 18px; color: #fff;
+            border-left: 4px solid var(--tv-accent); padding-left: 12px;
             text-transform: uppercase; outline: none;
         }
 
-        /* ГАЗЕТА */
-        .news-design { display: none; padding: 40px 25px; background: var(--news-card); }
-        .mode-news .news-design { display: block; }
+        .mode-news .news-design { display: block; padding: 30px 20px; background: #1a1a1c; }
         .mode-news .tv-design { display: none; }
+        .news-design { display: none; }
+        .news-header { font-family: 'Playfair Display', serif; font-size: 28px; text-align: center; border-bottom: 2px solid var(--tv-accent); margin-bottom: 20px; }
+        .news-headline { font-size: 18px; font-weight: 800; line-height: 1.4; outline: none; }
 
-        .news-header { 
-            font-family: 'Playfair Display', serif; font-size: 32px; 
-            text-align: center; border-bottom: 3px solid var(--news-accent); 
-            margin-bottom: 25px; padding-bottom: 10px; color: #fff;
-        }
-        .news-headline {
-            font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 800;
-            line-height: 1.3; text-align: left; outline: none; color: #fff;
-        }
+        .img-container { width: 100%; height: 100%; overflow: hidden; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.1s; }
 
-        .img-container { width: 100%; height: 100%; overflow: hidden; position: relative; }
-        .mode-news .img-container { 
-            aspect-ratio: 16/9; margin-bottom: 20px; border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .preview-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.1s; transform-origin: center; }
+        .controls { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--tv-accent); border-radius: 50%; cursor: pointer; }
 
-        .controls { padding: 25px; display: flex; flex-direction: column; gap: 20px; }
-        .btn-group { display: flex; gap: 12px; }
-        
-        .btn-premium {
-            flex: 1; padding: 14px; border-radius: 12px; border: none;
-            font-family: 'Inter'; font-size: 11px; font-weight: 700;
-            text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
-            transition: var(--transition);
-            background: #2a2a2c; color: #fff;
-        }
-        .btn-premium.main { background: var(--tv-accent) !important; }
-        .btn-premium:active { transform: scale(0.96); }
-
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px;
-            background: rgba(255,255,255,0.2); outline: none;
+        /* РАДІАЛЬНЕ МЕНЮ */
+        .radial-menu-container {
+            position: fixed; bottom: 40px; left: 50%;
+            transform: translateX(-50%); z-index: 9999;
         }
 
-        .nav-bar {
-            position: fixed; bottom: 30px; display: flex; gap: 8px;
-            background: rgba(20,20,22,0.8); backdrop-filter: blur(20px);
-            padding: 8px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100;
+        .fingerprint-btn {
+            width: 70px; height: 70px;
+            background: var(--tv-accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(230, 30, 42, 0.5);
+            cursor: pointer; position: relative; z-index: 10;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .nav-item {
-            padding: 10px 18px; border-radius: 40px; border: none; background: transparent;
-            color: #888; font-weight: 600; cursor: pointer; transition: var(--transition);
-            font-size: 11px; white-space: nowrap;
-        }
-        .nav-item.active { background: #fff !important; color: #000 !important; }
 
-        /* Custom Alert Styles */
+        .fingerprint-btn:active { transform: scale(0.9); }
+
+        .fingerprint-btn svg { width: 35px; height: 35px; fill: white; }
+
+        .menu-items {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0; height: 0;
+            visibility: hidden; transition: var(--transition);
+        }
+
+        .menu-items.active {
+            width: 260px; height: 260px; visibility: visible;
+        }
+
+        .menu-item {
+            position: absolute; width: 55px; height: 55px;
+            background: #2a2a2c; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 10px; font-weight: 700;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s; opacity: 0; transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+        }
+
+        .menu-items.active .menu-item { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+
+        /* Позиції кнопок по колу */
+        .item-1 { top: 15%; left: 50%; } /* Вгору - Зберегти */
+        .item-2 { top: 35%; left: 85%; } /* Праворуч верх - Додати */
+        .item-3 { top: 65%; left: 85%; } /* Праворуч низ - Ефір */
+        .item-4 { top: 65%; left: 15%; } /* Ліворуч низ - Газета */
+        .item-5 { top: 35%; left: 15%; } /* Ліворуч верх - Екран */
+
+        .menu-item.highlight { background: white; color: black; transform: translate(-50%, -50%) scale(1.3) !important; z-index: 20; }
+
+        /* Алерти */
         .alert-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-            display: none; align-items: center; justify-content: center;
-            z-index: 2000; opacity: 0; transition: opacity 0.3s ease;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: none; align-items: center; justify-content: center; z-index: 10000;
         }
-        .alert-card {
-            background: var(--tv-card); width: 85%; max-width: 320px;
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            padding: 30px 20px; text-align: center;
-            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .alert-overlay.active { opacity: 1; }
-        .alert-overlay.active .alert-card { transform: scale(1); }
-        .alert-title { color: var(--tv-accent); font-weight: 800; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; }
-        .alert-msg { color: #fff; font-size: 15px; line-height: 1.5; margin-bottom: 25px; }
-        .alert-btn { background: #fff; color: #000; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 800; cursor: pointer; }
+        .alert-card { background: #1c1c1e; width: 80%; max-width: 300px; padding: 30px; border-radius: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .alert-btn { background: var(--tv-accent); color: white; border: none; padding: 12px 25px; border-radius: 50px; margin-top: 20px; font-weight: 800; cursor: pointer; }
+
     </style>
 </head>
 <body class="mode-tv">
 
-    <div class="header">Розроблено <span>Gianni_Versace</span> спеціально для ТСН</div>
+    <div class="header">STUDIO <span>TSN</span> BY VERSACE</div>
 
     <div id="studio-layout"></div>
 
+    <div class="radial-menu-container">
+        <div class="menu-items" id="radialMenu">
+            <div class="menu-item item-1" data-action="save">ЗБЕРЕГТИ</div>
+            <div class="menu-item item-2" data-action="add">ДОДАТИ</div>
+            <div class="menu-item item-3" data-action="tv">ЕФІР</div>
+            <div class="menu-item item-4" data-action="news">ГАЗЕТА</div>
+            <div class="menu-item item-5" data-action="home">ЕКРАН</div>
+        </div>
+        <div class="fingerprint-btn" id="mainBtn">
+            <svg viewBox="0 0 24 24"><path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.56.24.13.33.43.2.67-.09.15-.24.24-.43.24zm3.1 3.53c-.21 0-.41-.13-.49-.33-.31-.83-.75-1.58-1.33-2.22-.18-.21-.16-.53.05-.71s.53-.16.71.05c.66.73 1.16 1.58 1.52 2.53.1.26-.04.54-.3.64-.06.02-.11.02-.16.02zM5.21 7.35c-.06 0-.11-.01-.16-.02-.26-.1-.4-.38-.3-.64.36-.95.86-1.8 1.52-2.53.18-.21.5-.23.71-.05s.23.5.05.71c-.58.64-1.02 1.39-1.33 2.22-.08.2-.28.33-.49.33zm14.28 12.18c-.06 0-.13-.01-.19-.04-.25-.11-.36-.4-.25-.65.54-1.25.82-2.61.82-4.04 0-4.85-3.94-8.8-8.79-8.8-4.84 0-8.78 3.96-8.78 8.8 0 1.43.28 2.79.82 4.04.11.25 0 .54-.25.65s-.54 0-.65-.25c-.59-1.38-.89-2.88-.89-4.44C2.31 9.38 6.65 5 11.98 5c5.34 0 9.69 4.38 9.69 9.8 0 1.56-.3 3.06-.9 4.44-.08.18-.25.29-.48.29zM11 22c-.28 0-.5-.22-.5-.5v-4.5c0-.28.22-.5.5-.5s.5.22.5.5v4.5c0 .28-.22.5-.5.5zm-4.72-1.12c-.13 0-.26-.05-.35-.15-.2-.2-.2-.51 0-.71l3.54-3.54c.2-.2.51-.2.71 0s.2.51 0 .71l-3.54 3.54c-.1.1-.23.15-.36.15zm9.44 0c-.13 0-.26-.05-.35-.15l-3.54-3.54c-.2-.2-.2-.51 0-.71s.51-.2.71 0l3.54 3.54c.2.2.2.51 0 .71-.09.1-.22.15-.36.15z"/></svg>
+        </div>
+    </div>
+
     <div id="custom-alert" class="alert-overlay">
         <div class="alert-card">
-            <div class="alert-title">ПОВІДОМЛЕННЯ</div>
-            <div id="alert-message" class="alert-msg">Текст</div>
+            <div id="alert-message" style="margin-bottom: 10px; font-weight: 800;">ПОВІДОМЛЕННЯ</div>
             <button class="alert-btn" onclick="TSNAlert.hide()">ЗРОЗУМІЛО</button>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <button class="nav-item active" id="nav-tv" onclick="switchTheme('tv')">ЕФІР</button>
-        <button class="nav-item" id="nav-news" onclick="switchTheme('news')">ГАЗЕТА</button>
-        <button class="nav-item" onclick="addCard()" style="color: #2ecc71;">Додати сторінку</button>
-        <button class="nav-item" onclick="addToHomeScreen()" style="color: #3498db;">На головний екран</button>
-        <button class="nav-item" onclick="exportImage()" style="font-weight: 800;">Зберегти в HD</button>
-    </div>
-
     <script>
         let count = 0;
-        let deferredPrompt;
+        let isMenuOpen = false;
+        let activeAction = null;
 
-        // Керування алертами
         const TSNAlert = {
             show(text) {
-                const overlay = document.getElementById('custom-alert');
                 document.getElementById('alert-message').innerText = text;
-                overlay.style.display = 'flex';
-                setTimeout(() => overlay.classList.add('active'), 10);
+                const el = document.getElementById('custom-alert');
+                el.style.display = 'flex';
             },
-            hide() {
-                const overlay = document.getElementById('custom-alert');
-                overlay.classList.remove('active');
-                setTimeout(() => overlay.style.display = 'none', 300);
+            hide() { document.getElementById('custom-alert').style.display = 'none'; }
+        };
+
+        const mainBtn = document.getElementById('mainBtn');
+        const radialMenu = document.getElementById('radialMenu');
+        const menuItems = document.querySelectorAll('.menu-item');
+
+        // ЛОГІКА РАДІАЛЬНОГО МЕНЮ
+        const handleStart = (e) => {
+            e.preventDefault();
+            isMenuOpen = true;
+            radialMenu.classList.add('active');
+            window.navigator.vibrate?.(40); // Легка вібрація
+        };
+
+        const handleMove = (e) => {
+            if (!isMenuOpen) return;
+            const touch = e.touches ? e.touches[0] : e;
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            menuItems.forEach(item => item.classList.remove('highlight'));
+            activeAction = null;
+
+            if (target && target.classList.contains('menu-item')) {
+                target.classList.add('highlight');
+                activeAction = target.getAttribute('data-action');
             }
         };
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
+        const handleEnd = () => {
+            if (!isMenuOpen) return;
+            isMenuOpen = false;
+            radialMenu.classList.remove('active');
 
-        async function addToHomeScreen() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            } else {
-                TSNAlert.show("Щоб додати на головний екран: 1. Натисніть 'Поділитися'. 2 Оберіть 'На початковий екран'");
+            if (activeAction) {
+                executeAction(activeAction);
+            }
+            menuItems.forEach(item => item.classList.remove('highlight'));
+        };
+
+        mainBtn.addEventListener('touchstart', handleStart);
+        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('touchend', handleEnd);
+
+        // Обробка команд
+        function executeAction(action) {
+            window.navigator.vibrate?.(20);
+            switch(action) {
+                case 'add': addCard(); break;
+                case 'tv': switchTheme('tv'); break;
+                case 'news': switchTheme('news'); break;
+                case 'save': exportImage(); break;
+                case 'home': TSNAlert.show("Натисніть 'Поділитися' та 'Додати на початковий екран'"); break;
             }
         }
 
+        // ОСНОВНІ ФУНКЦІЇ СТУДІЇ
         function addCard() {
             count++;
             const container = document.getElementById('studio-layout');
@@ -204,25 +239,19 @@
             card.innerHTML = `
                 <div class="canvas-area">
                     <div class="tv-design">
-                        <div class="tv-ui">
-                            <div class="tv-headline" contenteditable="true">НОВИЙ ФОРМАТ ТСН</div>
-                        </div>
-                        <div class="img-container">
-                            <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800" class="preview-img" id="img-tv-${count}">
-                        </div>
+                        <div class="tv-ui"><div class="tv-headline" contenteditable="true">НОВИЙ ФОРМАТ ТСН</div></div>
+                        <div class="img-container"><img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800" class="preview-img" id="img-tv-${count}"></div>
                     </div>
                     <div class="news-design">
-                        <div class="news-header">ТСН</div>
-                        <div class="img-container">
-                            <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800" class="preview-img" id="img-news-${count}">
-                        </div>
-                        <div class="news-headline" contenteditable="true">Редагуйте текст новини прямо тут для газетного формату.</div>
+                        <div class="news-header">ТСН УКРАЇНА</div>
+                        <div class="img-container"><img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800" class="preview-img" id="img-news-${count}"></div>
+                        <div class="news-headline" contenteditable="true">Ексклюзив: редакція ТСН оновила мобільну студію для журналістів.</div>
                     </div>
                 </div>
                 <div class="controls">
-                    <div class="btn-group">
-                        <button class="btn-premium main" onclick="document.getElementById('file-${count}').click()">Фото</button>
-                        <button class="btn-premium" onclick="document.getElementById('c-${count}').remove()">Видалити</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="alert-btn" style="flex:1; margin:0;" onclick="document.getElementById('file-${count}').click()">ФОТО</button>
+                        <button class="alert-btn" style="flex:1; margin:0; background:#333;" onclick="document.getElementById('c-${count}').remove()">ВИДАЛИТИ</button>
                     </div>
                     <input type="range" min="1" max="2" step="0.01" value="1" oninput="handleZoom(${count}, this.value)">
                     <input type="file" id="file-${count}" style="display:none" onchange="handleImg(event, ${count})">
@@ -240,30 +269,27 @@
         }
 
         function handleZoom(id, v) {
-            document.getElementById(`img-tv-${id}`).style.transform = `scale(${v})`;
-            document.getElementById(`img-news-${id}`).style.transform = `scale(${v})`;
+            const style = `scale(${v})`;
+            document.getElementById(`img-tv-${id}`).style.transform = style;
+            document.getElementById(`img-news-${id}`).style.transform = style;
         }
 
         function switchTheme(mode) {
             document.body.className = 'mode-' + mode;
-            document.getElementById('nav-tv').classList.toggle('active', mode === 'tv');
-            document.getElementById('nav-news').classList.toggle('active', mode === 'news');
         }
 
         async function exportImage() {
             const items = document.querySelectorAll('.canvas-area');
-            if(items.length === 0) {
-                TSNAlert.show("Спочатку додайте картку!");
-                return;
-            }
-            TSNAlert.show("Зачекайте, йде збереження...");
+            if(items.length === 0) return;
+            TSNAlert.show("Зберігаємо...");
             for (let item of items) {
-                const canvas = await html2canvas(item, { scale: 2, useCORS: true });
+                const canvas = await html2canvas(item, { scale: 3, useCORS: true });
                 const link = document.createElement('a');
                 link.download = `TSN_${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }
+            TSNAlert.hide();
         }
 
         window.onload = addCard;
